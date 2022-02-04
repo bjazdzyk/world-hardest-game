@@ -32,6 +32,15 @@ class level{
 	}
 	editSquare(x, y, type){
 		this.L[crd2str(x, y)] = type
+		console.log(crd2str(x, y))
+	}
+	fill(x, y, w, h, type){
+		for(let i=x; i<x+w; i++){
+			for(let j=y; j<y+h; j++){
+				this.editSquare(i, j, type)
+			}
+		}
+		console.log(this.L)
 	}
 	render(){
 		ctx.fillStyle = "white"
@@ -40,7 +49,7 @@ class level{
 			for(let j=0; j<this.height; j++){
 				if(this.L[crd2str(i, j)] === 1){
 					ctx.fillStyle = "skyblue"
-					ctx.fillRect(this.renderAnchor.x+i*this.cellSize.x, this.renderAnchor.y+i*this.cellSize.y)
+					ctx.fillRect(this.renderAnchor.x+i*this.cellSize.x-1, this.renderAnchor.y+j*this.cellSize.y-1, this.cellSize.x+2, this.cellSize.y+2)
 				}
 			}
 		}
@@ -51,13 +60,17 @@ class level{
 let levels = {}
 levels[1] = new level(16, 7, {x:1.5, y:3.5}, "empty")
 
+levels[1].fill(3, 0, 1, 6, 1)
+levels[1].fill(4, 0, 7, 1, 1)
+levels[1].fill(5, 6, 7, 1, 1)
+levels[1].fill(12, 1, 1, 6, 1)
 
+
+ctx.fillStyle = "skyblue"
+ctx.fillRect(0, 0, 800, 600)
 
 const loop =()=>{
 	requestAnimationFrame(loop)
-	ctx.fillStyle = "skyblue"
-	ctx.fillRect(0, 0, 800, 600)
-
 	levels[1].render()
 }
 
