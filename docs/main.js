@@ -68,8 +68,8 @@ class Level{
 	newPlayer(player){
 		this.players[player.id] = player
 		this.playerIds.push(player.id)
-		player.x = this.startPoint.x
-		player.y = this.startPoint.y
+		this.players[player.id].x = this.startPoint.x
+		this.players[player.id].y = this.startPoint.y
 	}
 
 	update(){
@@ -87,6 +87,20 @@ class Level{
 			}
 			this.enemies[this.enemyIds[i]].x += this.enemies[this.enemyIds[i]].step.x
 			this.enemies[this.enemyIds[i]].y += this.enemies[this.enemyIds[i]].step.y
+		}
+		for(let i=0; i<this.playerIds.length; i++){
+			for(let j=0; j<this.enemyIds.length; j++){
+				const pX = this.players[this.playerIds[i]].x
+				const pY = this.players[this.playerIds[i]].y
+				const eX = this.enemies[this.enemyIds[j]].x
+				const eY = this.enemies[this.enemyIds[j]].y
+				const delta = Math.sqrt((eX-pX)*(eX-pX) + (eY-pY)*(eY-pY))
+				const permissibleDelta = this.enemies[this.enemyIds[j]].radius + this.cellSize.x*this.players[this.playerIds[i]].scale/2
+				if(delta*this.cellSize.x < permissibleDelta){
+					this.players[this.playerIds[i]].isDead = true
+				}
+
+			}
 		}
 	}
 	render(){
@@ -108,7 +122,7 @@ class Level{
 		//enemies
 		for(let i=0; i<this.enemyIds.length; i++){
 			const enemy = this.enemies[this.enemyIds[i]]
-			ctx.fillStyle = "red"
+			ctx.fillStyle = "blue"
 			ctx.beginPath()
 			ctx.arc(this.renderAnchor.x+enemy.x*this.cellSize.x, this.renderAnchor.y+enemy.y*this.cellSize.y, enemy.radius, 0, 2*Math.PI)
 			ctx.fill()
@@ -116,8 +130,10 @@ class Level{
 		//players
 		for(let i=0; i<this.playerIds.length; i++){
 			const player = this.players[this.playerIds[i]]
-			ctx.fillStyle = player.color
-			ctx.fillRect(this.renderAnchor.x+player.x*this.cellSize.x-this.cellSize.x*player.scale/2, this.renderAnchor.y+player.y*this.cellSize.y-this.cellSize.x*player.scale/2, this.cellSize.x*player.scale, this.cellSize.y*player.scale)
+			if(!player.isDead){
+				ctx.fillStyle = player.color
+				ctx.fillRect(this.renderAnchor.x+player.x*this.cellSize.x-this.cellSize.x*player.scale/2, this.renderAnchor.y+player.y*this.cellSize.y-this.cellSize.x*player.scale/2, this.cellSize.x*player.scale, this.cellSize.y*player.scale)
+			}
 
 		}
 	}
@@ -126,6 +142,7 @@ class Level{
 
 class Player{
 	constructor(id, level, color = "red", speed = 0.05){
+		this.isDead = false
 		this.speed = speed
 		this.id = id
 		this.level = level
@@ -136,32 +153,34 @@ class Player{
 		level.newPlayer(this)
 	}
 	move(x, y){
-		if(x<0 && this.x>this.scale/2){
-			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y-this.scale/2))] != 1){
-				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y+this.scale/2))] != 1){
-					this.x += x
+		if(!this.isDead){
+			if(x<0 && this.x>this.scale/2){
+				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y-this.scale/2))] != 1){
+					if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y+this.scale/2))] != 1){
+						this.x += x
+					}
 				}
 			}
-		}
-		if(x>0 && this.x<this.level.width-this.scale/2){
-			if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y-this.scale/2))] != 1){
-				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y+this.scale/2))] != 1){
-					this.x += x
+			if(x>0 && this.x<this.level.width-this.scale/2){
+				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y-this.scale/2))] != 1){
+					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y+this.scale/2))] != 1){
+						this.x += x
+					}
 				}
 			}
-		}
 
-		if(y<0 && this.y>this.scale/2+0.05){
-			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
-				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
-					this.y += y
+			if(y<0 && this.y>this.scale/2+0.05){
+				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+						this.y += y
+					}
 				}
 			}
-		}
-		if(y>0 && this.y<this.level.height-this.scale/2-0.05){
-			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
-				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
-					this.y += y
+			if(y>0 && this.y<this.level.height-this.scale/2-0.05){
+				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+						this.y += y
+					}
 				}
 			}
 		}
