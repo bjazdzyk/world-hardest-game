@@ -8,8 +8,9 @@ const crd2str =(x, y)=>{
 	return x.toString() + ":" + y.toString()
 }
 
-class level{
+class Level{
 	constructor(width, height, startPoint, template){
+		this.tick = 0
 		this.width = width
 		this.height = height
 		this.template = template
@@ -17,7 +18,8 @@ class level{
 		this.L = {}
 		this.enemies = {}
 		this.enemyIds = []
-
+		this.players = {}
+		this.playerIds =[ ]
 		if(this.width > this.height){
 			this.renderSize = {x:screenWidth-100, y:(screenWidth-100)/this.width*this.height}
 		}else{
@@ -43,7 +45,7 @@ class level{
 			}
 		}
 	}
-	addEnemy(id, path, ticksBetween, sizeScale = 0.2){
+	addEnemy(id, path, ticksBetween, sizeScale = 0.22){
 		const radius = Math.min(this.cellSize.x, this.cellSize.y)*sizeScale
 		this.enemies[id] = {path: path, x:path[0][0], y:path[0][1], radius: radius}
 		this.enemyIds.push(id)
@@ -62,12 +64,20 @@ class level{
 			this.enemies[id].static = true
 		}
 	}
-	update(){
 
+	newPlayer(player){
+		this.players[player.id] = player
+		this.playerIds.push(player.id)
+		player.x = this.startPoint.x
+		player.y = this.startPoint.y
+	}
+
+	update(){
 		for(let i=0; i<this.enemyIds.length; i++){
 			const enemy = this.enemies[this.enemyIds[i]]
 			const destinationDelta = Math.sqrt((enemy.path[enemy.destination][0]-enemy.x)*(enemy.path[enemy.destination][0]-enemy.x)+(enemy.path[enemy.destination][1]-enemy.y)*(enemy.path[enemy.destination][1]-enemy.y))
-			if(Math.abs(destinationDelta*this.cellSize.x) < 5){
+			if(Math.abs(destinationDelta*this.cellSize.x) < 1){
+
 				this.enemies[this.enemyIds[i]].lastPoint = enemy.destination
 				this.enemies[this.enemyIds[i]].destination = (enemy.destination+1)%enemy.path.length
 				const delta = {x: enemy.path[this.enemies[this.enemyIds[i]].destination][0]-enemy.path[this.enemies[this.enemyIds[i]].lastPoint][0], y: enemy.path[this.enemies[this.enemyIds[i]].destination][1]-enemy.path[this.enemies[this.enemyIds[i]].lastPoint][1]}
@@ -82,6 +92,7 @@ class level{
 	render(){
 		ctx.fillStyle = "white"
 		ctx.fillRect(this.renderAnchor.x, this.renderAnchor.y, this.renderSize.x, this.renderSize.y)
+		//wals
 		for(let i=0; i<this.width; i++){
 			for(let j=0; j<this.height; j++){
 				if(this.L[crd2str(i, j)] === 1){
@@ -94,6 +105,7 @@ class level{
 				}
 			}
 		}
+		//enemies
 		for(let i=0; i<this.enemyIds.length; i++){
 			const enemy = this.enemies[this.enemyIds[i]]
 			ctx.fillStyle = "red"
@@ -101,12 +113,29 @@ class level{
 			ctx.arc(this.renderAnchor.x+enemy.x*this.cellSize.x, this.renderAnchor.y+enemy.y*this.cellSize.y, enemy.radius, 0, 2*Math.PI)
 			ctx.fill()
 		}
+		//players
+		for(let i=0; i<this.playerIds.length; i++){
+			const player = this.players[this.playerIds[i]]
+			ctx.fillStyle = player.color
+			ctx.fillRect(this.renderAnchor.x+player.x*this.cellSize.x-this.cellSize.x*player.scale/2, this.renderAnchor.y+player.y*this.cellSize.y-this.cellSize.x*player.scale/2, this.cellSize.x*player.scale, this.cellSize.y*player.scale)
+
+		}
 	}
 
 }
 
+class Player{
+	constructor(id, level, scale = 0.6, color = "red"){
+		this.id = id
+		this.level = level
+		this.scale = scale
+		this.color = color
+		level.newPlayer(this)
+	}
+}
+
 let levels = {}
-levels[1] = new level(16, 7, {x:1.5, y:3.5}, "empty")
+levels[1] = new Level(16, 7, {x:1.5, y:3.5}, "empty")
 
 levels[1].fill(3, 0, 1, 6, 1)
 levels[1].fill(4, 0, 7, 1, 1)
@@ -120,7 +149,7 @@ levels[1].addEnemy("dot3", [[4.25, 3.5], [11.75, 3.5]], 50)
 levels[1].addEnemy("dot4", [[11.75, 4.5], [4.25, 4.5]], 50)
 levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
 
-
+const bob = new Player("bob", levels[1])
 
 const loop =()=>{
 	requestAnimationFrame(loop)
