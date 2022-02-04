@@ -125,11 +125,11 @@ class Level{
 }
 
 class Player{
-	constructor(id, level, scale = 0.6, color = "red", speed = 0.05){
+	constructor(id, level, color = "red", speed = 0.05){
 		this.speed = speed
 		this.id = id
 		this.level = level
-		this.scale = scale
+		this.scale = 0.6
 		this.color = color
 		this.x = 0
 		this.y = 0
@@ -137,17 +137,33 @@ class Player{
 	}
 	move(x, y){
 		if(x<0 && this.x>this.scale/2){
-			this.x += x
+			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y-this.scale/2))] != 1){
+				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y+this.scale/2))] != 1){
+					this.x += x
+				}
+			}
 		}
 		if(x>0 && this.x<this.level.width-this.scale/2){
-			this.x += x
+			if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y-this.scale/2))] != 1){
+				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y+this.scale/2))] != 1){
+					this.x += x
+				}
+			}
 		}
 
-		if(y<0 && this.y>this.scale/2){
-			this.y += y
+		if(y<0 && this.y>this.scale/2+0.05){
+			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+					this.y += y
+				}
+			}
 		}
-		if(y>0 && this.y<this.level.height-this.scale/2){
-			this.y += y
+		if(y>0 && this.y<this.level.height-this.scale/2-0.05){
+			if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+					this.y += y
+				}
+			}
 		}
 	}
 }
@@ -179,13 +195,13 @@ const loop =()=>{
 	levels[1].render()
 
 
-	if(keys["KeyW"]){
+	if(keys["KeyW"] || keys["ArrowUp"]){
 		player.move(0, -player.speed)
-	}if(keys["KeyS"]){
+	}if(keys["KeyS"] || keys["ArrowDown"]){
 		player.move(0, player.speed)
-	}if(keys["KeyA"]){
+	}if(keys["KeyA"] || keys["ArrowLeft"]){
 		player.move(-player.speed, 0)
-	}if(keys["KeyD"]){
+	}if(keys["KeyD"] || keys["ArrowRight"]){
 		player.move(player.speed, 0)
 	}
 }
