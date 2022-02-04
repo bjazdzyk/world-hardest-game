@@ -125,12 +125,30 @@ class Level{
 }
 
 class Player{
-	constructor(id, level, scale = 0.6, color = "red"){
+	constructor(id, level, scale = 0.6, color = "red", speed = 0.05){
+		this.speed = speed
 		this.id = id
 		this.level = level
 		this.scale = scale
 		this.color = color
+		this.x = 0
+		this.y = 0
 		level.newPlayer(this)
+	}
+	move(x, y){
+		if(x<0 && this.x>this.scale/2){
+			this.x += x
+		}
+		if(x>0 && this.x<this.level.width-this.scale/2){
+			this.x += x
+		}
+
+		if(y<0 && this.y>this.scale/2){
+			this.y += y
+		}
+		if(y>0 && this.y<this.level.height-this.scale/2){
+			this.y += y
+		}
 	}
 }
 
@@ -149,14 +167,33 @@ levels[1].addEnemy("dot3", [[4.25, 3.5], [11.75, 3.5]], 50)
 levels[1].addEnemy("dot4", [[11.75, 4.5], [4.25, 4.5]], 50)
 levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
 
-const bob = new Player("bob", levels[1])
+const player = new Player("player", levels[1])
 
+
+let keys = {}
 const loop =()=>{
 	requestAnimationFrame(loop)
 	ctx.fillStyle = "#70bfe0"
 	ctx.fillRect(0, 0, 800, 600)
 	levels[1].update()
 	levels[1].render()
-}
 
+
+	if(keys["KeyW"]){
+		player.move(0, -player.speed)
+	}if(keys["KeyS"]){
+		player.move(0, player.speed)
+	}if(keys["KeyA"]){
+		player.move(-player.speed, 0)
+	}if(keys["KeyD"]){
+		player.move(player.speed, 0)
+	}
+}
 loop()
+
+document.addEventListener('keydown', (e)=>{
+	keys[e.code] = true
+})
+document.addEventListener('keyup', (e)=>{
+	keys[e.code] = null
+})
