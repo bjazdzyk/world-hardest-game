@@ -25,7 +25,7 @@ class Level{
 		if(this.width > this.height){
 			this.renderSize = {x:screenWidth-100, y:(screenWidth-100)/this.width*this.height}
 		}else{
-			this.renderSize = {x:(screenHeight-100)/this.height*this.width, y:screenHeigh-100}
+			this.renderSize = {x:(screenHeight-100)/this.height*this.width, y:screenHeight-100}
 		}
 		this.renderAnchor = {x: (screenWidth-this.renderSize.x)/2, y: (screenHeight-this.renderSize.y)/2}
 		this.cellSize = {x: this.renderSize.x/this.width, y:this.renderSize.y/this.height}
@@ -106,6 +106,7 @@ class Level{
 				for(const target of this.targets){
 					if(pX>=target.minX && pX<=target.maxX && pY>=target.minY && pY<=target.maxY){
 						this.players[this.playerIds[i]].color = "green"
+						this.players[this.playerIds[i]].levelUp()
 					}else{
 						this.players[this.playerIds[i]].color = "red"
 					}
@@ -166,47 +167,51 @@ class Player{
 		this.color = color
 		this.x = 0
 		this.y = 0
-		level.newPlayer(this)
+		levels[level].newPlayer(this)
 		this.finished = 0
 	}
 	move(x, y){
 		if(!this.isDead){
 			if(x<0 && this.x>this.scale/2){
-				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y-this.scale/2))] != 1){
-					if(this.level.L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y+this.scale/2))] != 1){
+				if(levels[this.level].L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y-this.scale/2))] != 1){
+					if(levels[this.level].L[crd2str(Math.floor(this.x-this.scale/2-0.07), Math.floor(this.y+this.scale/2))] != 1){
 						this.x += x
 					}
 				}
 			}
-			if(x>0 && this.x<this.level.width-this.scale/2){
-				if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y-this.scale/2))] != 1){
-					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y+this.scale/2))] != 1){
+			if(x>0 && this.x<levels[this.level].width-this.scale/2){
+				if(levels[this.level].L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y-this.scale/2))] != 1){
+					if(levels[this.level].L[crd2str(Math.floor(this.x+this.scale/2+0.07), Math.floor(this.y+this.scale/2))] != 1){
 						this.x += x
 					}
 				}
 			}
 
 			if(y<0 && this.y>this.scale/2+0.05){
-				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
-					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+				if(levels[this.level].L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
+					if(levels[this.level].L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y-this.scale/2-0.07))] != 1){
 						this.y += y
 					}
 				}
 			}
-			if(y>0 && this.y<this.level.height-this.scale/2-0.05){
-				if(this.level.L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
-					if(this.level.L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+			if(y>0 && this.y<levels[this.level].height-this.scale/2-0.05){
+				if(levels[this.level].L[crd2str(Math.floor(this.x-this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
+					if(levels[this.level].L[crd2str(Math.floor(this.x+this.scale/2), Math.floor(this.y+this.scale/2+0.07))] != 1){
 						this.y += y
 					}
 				}
 			}
 		}
 	}
+	levelUp(){
+		this.level += 1
+		levels[this.level].newPlayer(this)
+
+	}
 }
 
 let levels = {}
 levels[1] = new Level(16, 7, {x:1.5, y:3.5}, "empty")
-
 levels[1].fill(3, 0, 1, 6, 1)
 levels[1].fill(4, 0, 7, 1, 1)
 levels[1].fill(5, 6, 7, 1, 1)
@@ -220,7 +225,22 @@ levels[1].addEnemy("dot4", [[11.75, 4.5], [4.25, 4.5]], 50)
 levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
 levels[1].addTarget({minX:13, minY:0, maxX:16, maxY:7})
 
-const player = new Player("player", levels[1])
+levels[2] = new Level(18, 6, {x:1.5, y:3}, "empty")
+levels[2].fill(0, 0, 3, 2, 1)
+levels[2].fill(0, 4, 3, 2, 1)
+levels[2].fill(15, 0, 3, 2, 1)
+levels[2].fill(15, 4, 3, 2, 1)
+levels[2].fill(0, 2, 3, 2, 2)
+levels[2].fill(15, 2, 3, 2, 2)
+let id = 1
+for(let i=3.5; i<=15; i+=2){
+	levels[2].addEnemy(`dot${id}`, [[i, 0.25],[i, 5.75]], 50)
+	id += 1
+	levels[2].addEnemy(`dot${id}`, [[i+1, 5.75],[i+1, 0.25]], 50)
+	id += 1
+}
+
+const player = new Player("player", 1)
 
 
 let keys = {}
@@ -228,8 +248,8 @@ const loop =()=>{
 	requestAnimationFrame(loop)
 	ctx.fillStyle = "#70bfe0"
 	ctx.fillRect(0, 0, 800, 600)
-	levels[1].update()
-	levels[1].render()
+	levels[player.level].update()
+	levels[player.level].render()
 
 
 	if(keys["KeyW"] || keys["ArrowUp"]){
