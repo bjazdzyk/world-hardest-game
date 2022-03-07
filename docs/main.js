@@ -20,6 +20,8 @@ class Level{
 		this.enemyIds = []
 		this.players = {}
 		this.playerIds =[ ]
+		this.targets = [{minX:this.width+1, minY:this.height+1, maxX:-1, maxY:-1}]
+
 		if(this.width > this.height){
 			this.renderSize = {x:screenWidth-100, y:(screenWidth-100)/this.width*this.height}
 		}else{
@@ -72,6 +74,10 @@ class Level{
 		this.players[player.id].y = this.startPoint.y
 	}
 
+	addTarget(target){
+		this.targets.push(target)
+	}
+
 	update(){
 		for(let i=0; i<this.enemyIds.length; i++){
 			const enemy = this.enemies[this.enemyIds[i]]
@@ -96,6 +102,16 @@ class Level{
 				const eY = this.enemies[this.enemyIds[j]].y
 				const delta = Math.sqrt((eX-pX)*(eX-pX) + (eY-pY)*(eY-pY))
 				const permissibleDelta = this.enemies[this.enemyIds[j]].radius + this.cellSize.x*this.players[this.playerIds[i]].scale/2
+
+				for(const target of this.targets){
+					if(pX>=target.minX && pX<=target.maxX && pY>=target.minY && pY<=target.maxY){
+						this.players[this.playerIds[i]].color = "green"
+					}else{
+						this.players[this.playerIds[i]].color = "red"
+					}
+
+				}
+
 				if(delta*this.cellSize.x < permissibleDelta){
 					this.players[this.playerIds[i]].isDead = true
 				}
@@ -151,6 +167,7 @@ class Player{
 		this.x = 0
 		this.y = 0
 		level.newPlayer(this)
+		this.finished = 0
 	}
 	move(x, y){
 		if(!this.isDead){
@@ -201,6 +218,7 @@ levels[1].addEnemy("dot2", [[11.75, 2.5], [4.25, 2.5]], 50)
 levels[1].addEnemy("dot3", [[4.25, 3.5], [11.75, 3.5]], 50)
 levels[1].addEnemy("dot4", [[11.75, 4.5], [4.25, 4.5]], 50)
 levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
+levels[1].addTarget({minX:13, minY:0, maxX:16, maxY:7})
 
 const player = new Player("player", levels[1])
 
