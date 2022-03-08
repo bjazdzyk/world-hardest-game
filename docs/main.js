@@ -107,6 +107,7 @@ class Level{
 					if(pX>=target.minX && pX<=target.maxX && pY>=target.minY && pY<=target.maxY){
 						this.players[this.playerIds[i]].color = "green"
 						this.players[this.playerIds[i]].levelUp()
+						console.log("lol")
 					}else{
 						this.players[this.playerIds[i]].color = "red"
 					}
@@ -115,6 +116,8 @@ class Level{
 
 				if(delta*this.cellSize.x < permissibleDelta){
 					this.players[this.playerIds[i]].isDead = true
+					this.players[this.playerIds[i]].respawn()
+
 				}
 
 			}
@@ -208,6 +211,11 @@ class Player{
 		levels[this.level].newPlayer(this)
 
 	}
+	respawn(){
+		this.x = levels[this.level].startPoint.x
+		this.y = levels[this.level].startPoint.y
+		this.isDead = false
+	}
 }
 
 let levels = {}
@@ -239,6 +247,29 @@ for(let i=3.5; i<=15; i+=2){
 	levels[2].addEnemy(`dot${id}`, [[i+1, 5.75],[i+1, 0.25]], 50)
 	id += 1
 }
+levels[2].addTarget({minX:15, minY:0, maxX:18, maxY:6})
+
+levels[3] = new Level(13, 13, {x:0.5, y:12.5}, "empty")
+levels[3].fill(0, 11, 1, 2, 2)
+levels[3].fill(11, 0, 2, 1, 2)
+levels[3].fill(1, 11, 10, 2, 1)
+levels[3].fill(11, 1, 2, 12, 1)
+levels[3].fill(3, 3, 5, 5, 1)
+levels[3].addEnemy("dot1", [[0.5, 0.5], [0.5, 10.5], [10.5, 10.5], [10.5, 0.5]], 100)
+levels[3].addEnemy("dot2", [[10.5, 10.5], [10.5, 0.5], [0.5, 0.5], [0.5, 10.5]], 100)
+levels[3].addEnemy("dot3", [[0.5, 10.5], [10.5, 10.5], [10.5, 0.5], [0.5, 0.5]], 100)
+levels[3].addEnemy("dot4", [[10.5, 0.5], [0.5, 0.5], [0.5, 10.5],[10.5, 10.5]], 100)
+
+levels[3].addEnemy("dot5", [[2.5, 2.5], [8.5, 2.5], [8.5, 8.5], [2.5, 8.5]], 100)
+levels[3].addEnemy("dot6", [[8.5, 8.5], [2.5, 8.5], [2.5, 2.5], [8.5, 2.5]], 100)
+levels[3].addEnemy("dot7", [[8.5, 2.5], [8.5, 8.5], [2.5, 8.5], [2.5, 2.5]], 100)
+levels[3].addEnemy("dot8", [[2.5, 8.5], [2.5, 2.5], [8.5, 2.5], [8.5, 8.5]], 100)
+
+
+levels[3].addEnemy("dot9", [[1.5, 1.5], [1.5, 9.5]], 100)
+levels[3].addEnemy("dot10", [[9.5, 9.5], [9.5, 1.5]], 100)
+levels[3].addEnemy("dot11", [[9.5, 1.5], [1.5, 1.5]], 100)
+levels[3].addEnemy("dot12", [[1.5, 9.5], [9.5, 9.5]], 100)
 
 const player = new Player("player", 1)
 
